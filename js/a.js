@@ -19,14 +19,93 @@ firebase.initializeApp = {
 // Initialize Firebase
 var db = firebase.firestore();
 
-db.collection("usuarios").add({
-    nombre: "Maria",
-    email: "maria@gmail.com",
-    telefono: 696969699
-})
-.then(function(docRef){
-    console.log("Documento escrito con ID: " , docRef.id);
-})
-.catch(function(error){
-    console.error("Error al añadir el documento:" , error )
+//Agregar Usuarios de manera statica
+function guardar(){
+    var name = document.getElementById('nombre').value;
+    var email = document.getElementById('email').value;
+    var phone = document.getElementById('telefono').value;
+    db.collection("usuarios").add({
+        nombre: name,
+        email: email,
+        telefono: phone
+    })
+    .then(function(docRef){
+        console.log("Documento escrito con ID: " , docRef.id);
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
+    })
+    .catch(function(error){
+        console.error("Error al añadir el documento:" , error )
+    });
+}
+
+//Leer Usuarios
+var tabla = document.getElementById('tabla');
+db.collection("usuarios").onSnapshot((querySnapshot) => {
+    tabla.innerHTML = '';
+    querySnapshot.forEach((doc) => {
+        console.log(`${doc.id} => ${doc.data()}`);
+        tabla.innerHTML += `
+        <tr>
+        <th scope="row">${doc.id}</th>
+        <td>${doc.data().nombre}</td>
+        <td>${doc.data().email}</td>
+        <td>${doc.data().telefono}</td>
+        <td><button class= "btn btn-danger" onclick="eliminar('${doc.id}')">Eliminar</button></td>
+        <td><button class= "btn btn-warning" onclick="editar('${doc.id}','${doc.data().nombre}','${doc.data().email}','${doc.data().telefono}')">Editar</button></td>
+        </tr>
+        `
+    });
 });
+
+//Borrar Usuarios
+function eliminar(id){
+    db.collection("usuarios").doc(id).delete().then(function() {
+        console.log("Usuario eliminado correctamente!");
+    }).catch(function(error) {
+        console.error("Error al eliminar el usuario: ", error);
+});
+}
+
+//Actualizar Usuarios
+
+function editar(id,nombre,email,telefono){
+
+     document.getElementById('nombre').value = nombre;
+     document.getElementById('email').value = email;
+     document.getElementById('telefono').value = telefono;
+     var boton = document.getElementById('boton');
+     boton.innerHTML = 'Editar';
+
+     boton.onclick = function(){
+     var contacto = db.collection("usuarios").doc(id);
+     // Set the "capital" field of the city 'DC'
+
+     var name = document.getElementById('nombre').value;
+     var email = document.getElementById('email').value;
+     var telefono = document.getElementById('telefono').value;
+
+     return contacto.update({
+        nombre: name,
+        email: email,
+        telefono: telefono
+     })
+     .then(function() {
+        console.log("Usuario editado correctamente!");
+        boton.innerHTML = 'Guardar';
+        document.getElementById('nombre').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefono').value = '';
+     })
+     .catch(function(error) {
+        // The document probably doesn't exist.
+        console.error("Error updating document: ", error);
+     });
+     }
+
+}
+
+
+
+
