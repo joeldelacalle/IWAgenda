@@ -48,7 +48,7 @@ db.collection("usuarios").onSnapshot((querySnapshot) => {
         console.log(`${doc.id} => ${doc.data()}`);
         tabla.innerHTML += `
         <tr>
-        <th scope="row">${doc.id}</th>
+        <th style="visibility:hidden", scope="row">${doc.id}</th>
         <td>${doc.data().nombre}</td>
         <td>${doc.data().email}</td>
         <td>${doc.data().telefono}</td>
